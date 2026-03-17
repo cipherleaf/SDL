@@ -1,0 +1,27 @@
+name: Stardew Valley Specific Build
+on: [workflow_dispatch]
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: SDL2
+
+      - name: Setup & Build
+        run: |
+          mkdir build
+          cd build
+          # We force the build to be a Shared Library (.dylib)
+          cmake .. -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+                   -DSDL_SHARED=ON \
+                   -DSDL_STATIC=OFF \
+                   -DCMAKE_BUILD_TYPE=Release
+          make -j$(sysctl -n hw.ncpu)
+
+      - name: Upload Dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: stardew-fixed-sdl2
+          path: build/libSDL2-2.0.0.dylib

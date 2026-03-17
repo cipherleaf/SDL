@@ -243,11 +243,7 @@ static int HIDAPI_DriverXbox360_SetJoystickSensorsEnabled(SDL_HIDAPI_Device *dev
 static void HIDAPI_DriverXbox360_HandleStatePacket(SDL_Joystick *joystick, SDL_DriverXbox360_Context *ctx, Uint8 *data, int size)
 {
     Sint16 axis;
-#ifdef __MACOSX__
-    const SDL_bool invert_y_axes = SDL_FALSE;
-#else
-    const SDL_bool invert_y_axes = SDL_TRUE;
-#endif
+const SDL_bool invert_y_axes = SDL_FALSE;
 
     if (ctx->last_state[2] != data[2]) {
         SDL_PrivateJoystickButton(joystick, SDL_CONTROLLER_BUTTON_DPAD_UP, (data[2] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
