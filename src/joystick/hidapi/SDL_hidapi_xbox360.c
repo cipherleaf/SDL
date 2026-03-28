@@ -243,7 +243,9 @@ static int HIDAPI_DriverXbox360_SetJoystickSensorsEnabled(SDL_HIDAPI_Device *dev
 static void HIDAPI_DriverXbox360_HandleStatePacket(SDL_Joystick *joystick, SDL_DriverXbox360_Context *ctx, Uint8 *data, int size)
 {
     Sint16 axis;
-const SDL_bool invert_y_axes = SDL_FALSE;
+    /* Always invert Y axes: hardware reports up as negative, but raw HIDAPI
+       data is not pre-corrected regardless of macOS version or wired/wireless mode. */
+    const SDL_bool invert_y_axes = SDL_TRUE;
 
     if (ctx->last_state[2] != data[2]) {
         SDL_PrivateJoystickButton(joystick, SDL_CONTROLLER_BUTTON_DPAD_UP, (data[2] & 0x01) ? SDL_PRESSED : SDL_RELEASED);
@@ -270,9 +272,9 @@ const SDL_bool invert_y_axes = SDL_FALSE;
     SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_TRIGGERLEFT, axis);
     axis = ((int)data[5] * 257) - 32768;
     SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, axis);
-    axis = SDL_SwapLE16(*(Sint16 *)(&data[6]));
+    axis = SDL_SwapLE16(*(Sint16 *)(&data[8])); /* Left X is actually at byte 8 for this wireless controller */
     SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_LEFTX, axis);
-    axis = SDL_SwapLE16(*(Sint16 *)(&data[8]));
+    axis = SDL_SwapLE16(*(Sint16 *)(&data[6])); /* Left Y is actually at byte 6 */
     if (invert_y_axes) {
         axis = ~axis;
     }

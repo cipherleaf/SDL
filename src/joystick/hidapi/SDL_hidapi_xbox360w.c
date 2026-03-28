@@ -268,16 +268,16 @@ static void HIDAPI_DriverXbox360W_HandleStatePacket(SDL_Joystick *joystick, SDL_
     SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_TRIGGERLEFT, axis);
     axis = ((int)data[5] * 257) - 32768;
     SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, axis);
-    axis = SDL_SwapLE16(*(Sint16 *)(&data[6]));
-    SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_LEFTX, axis);
     axis = SDL_SwapLE16(*(Sint16 *)(&data[8]));
+    SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_LEFTX, axis);
+    axis = SDL_SwapLE16(*(Sint16 *)(&data[6]));
     if (invert_y_axes) {
         axis = ~axis;
     }
     SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_LEFTY, axis);
-    axis = SDL_SwapLE16(*(Sint16 *)(&data[10]));
-    SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_RIGHTX, axis);
     axis = SDL_SwapLE16(*(Sint16 *)(&data[12]));
+    SDL_PrivateJoystickAxis(joystick, SDL_CONTROLLER_AXIS_RIGHTX, axis);
+    axis = SDL_SwapLE16(*(Sint16 *)(&data[10]));
     if (invert_y_axes) {
         axis = ~axis;
     }

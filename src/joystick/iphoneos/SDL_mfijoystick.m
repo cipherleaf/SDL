@@ -1169,6 +1169,9 @@ static void IOS_MFIJoystickUpdate(SDL_Joystick *joystick)
             int axis = 0;
             int button = 0;
 
+            Sint16 all_axes[16] = {0};
+            int total_axes = 0;
+
             for (id key in device->axes) {
                 Sint16 value;
                 GCControllerElement *element = elements[key];
@@ -1177,7 +1180,44 @@ static void IOS_MFIJoystickUpdate(SDL_Joystick *joystick)
                 } else {
                     value = (Sint16)([(GCControllerButtonInput *)element value] * 32767);
                 }
-                SDL_PrivateJoystickAxis(joystick, axis++, value);
+                
+                if (total_axes < 16) {
+                    all_axes[total_axes++] = value;
+                }
+            }
+
+            if (total_axes >= 6) {
+                Sint16 t0 = all_axes[0]; // LSY
+                Sint16 t1 = all_axes[1]; // LSX
+                Sint16 t2 = all_axes[2]; // RSX
+                Sint16 t3 = all_axes[3]; // LT
+                Sint16 t4 = all_axes[4]; // RSY
+                Sint16 t5 = all_axes[5]; // RT
+                
+                all_axes[0] = t1;
+                all_axes[1] = t0;
+                all_axes[2] = t2;
+                all_axes[3] = t4;
+                all_axes[4] = t3;
+                all_axes[5] = t5;
+            } else if (total_axes >= 4) {
+                Sint16 t0 = all_axes[0];
+                Sint16 t1 = all_axes[1];
+                Sint16 t2 = all_axes[2];
+                Sint16 t3 = all_axes[3];
+                all_axes[0] = t1;
+                all_axes[1] = t0;
+                all_axes[2] = t2;
+                all_axes[3] = t3;
+            } else if (total_axes >= 2) {
+                Sint16 t0 = all_axes[0];
+                Sint16 t1 = all_axes[1];
+                all_axes[0] = t1;
+                all_axes[1] = t0;
+            }
+
+            for (int i = 0; i < total_axes; i++) {
+                SDL_PrivateJoystickAxis(joystick, axis++, all_axes[i]);
             }
 
             for (id key in device->buttons) {
@@ -1197,11 +1237,11 @@ static void IOS_MFIJoystickUpdate(SDL_Joystick *joystick)
 
             /* Axis order matches the XInput Windows mappings. */
             Sint16 axes[] = {
-                (Sint16)(gamepad.leftThumbstick.xAxis.value * 32767),
-                (Sint16)(gamepad.leftThumbstick.yAxis.value * -32767),
+                (Sint16)(gamepad.leftThumbstick.yAxis.value * 32767),
+                (Sint16)(gamepad.leftThumbstick.xAxis.value * -32767),
                 (Sint16)((gamepad.leftTrigger.value * 65535) - 32768),
-                (Sint16)(gamepad.rightThumbstick.xAxis.value * 32767),
-                (Sint16)(gamepad.rightThumbstick.yAxis.value * -32767),
+                (Sint16)(gamepad.rightThumbstick.yAxis.value * 32767),
+                (Sint16)(gamepad.rightThumbstick.xAxis.value * -32767),
                 (Sint16)((gamepad.rightTrigger.value * 65535) - 32768),
             };
 
